@@ -63,6 +63,7 @@ class ArticlePage(NewsPage):
     # de nuevo usamos el cosntructor padre
     def __init__(self, news_site_uid, url):
         super().__init__(news_site_uid, url)
+        self.url = url
 
     # Esta propiedad permitirá que tomemos el título del artículo
     @property
@@ -74,7 +75,7 @@ class ArticlePage(NewsPage):
         # estructura, por ejemplo para ElTiempo toca cambiarla (a futuro)
         return result[0].text if len(result) else ''
 
-    # Propiedad para tomar el cuerpo del artículo y se hace básicamente lo mismo 
+    # Propiedad para tomar el cuerpo del artículo y se hace básicamente lo mismo
     # de arriba
     @property
     def body(self):
