@@ -1,6 +1,10 @@
 # Esto para parsear los argumentos de nuestro programa
 # estos se encuentran en el config.yaml, serían elpais y eleluiversal
 import argparse
+# Para saber de cuándo es
+import datetime
+# Para guardar nuestros datos
+import csv
 # Aquí están nuestras clases
 import news_page_object as news
 # Módulo para expresiones regulares
@@ -51,8 +55,35 @@ def _news_scraper(news_site_uid):
             logger.info('Article fetched!!')
             # Lo añadimos a nuestra lista
             articles.append(article)
-    # Mostramos cuántos artículos encontramos :D
-    print(len(articles))
+    _save_articles(news_site_uid, articles)
+
+def _save_articles(news_site_uid, articles):
+    # Tomar la hora de ese momento
+    now = datetime.datetime.now().strftime('%Y_%m_%d')
+    out_file_name = '{news_site_uid}_{datetime}_articles.csv'.format(
+        news_site_uid=news_site_uid,
+        datetime=now
+    )
+    # Generaremos los headers de nuestro csv
+    # una función lambda es una función inline
+    # con esa función lo que hacemos es que buscamos todos los metodos del primer artículo
+    # esto porque todos los artículos tendrán los mismos métodos, la idea es 
+    # El filtro es para tomar los que no sean privados (no empiezan con '_')
+    # y pues sabemos que el resultado será body y title
+    # el filtro nos da un iterador, por eso lo convertimos con list
+    # estos nos ayuda por si agregamos propiedades, directamente nos permitirá tomarlas
+    # no tenemos que cambiar nada
+    csv_headers = list(filter(lambda property: not property.startswith('_'), dir(articles[0])))
+    with open(out_file_name, mode='w+') as f:
+        writer = csv.writer(f)
+        # Escribimos nuestros headers (la primera fila)
+        writer.writerow(csv_headers)
+        for article in articles:
+            # Así tomamos las propiedades que tenemos como headers, 
+            # entonces guardamos el 100% sin importar que las hayamos creado después
+            row = [str(getattr(article, prop))for prop in csv_headers]
+            writer.writerow(row)
+           
 
 # Esta función nos permite traer el artículo especificado 
 def _fetch_article(news_site_uid, host, link):
